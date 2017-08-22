@@ -2,9 +2,12 @@
 #include<stdio.h>
 #include<string.h>
 #include<iostream>
+
 #define false 0
 #define true 1
+
 using namespace std;
+
 class CharacterNode
 {
 public:
@@ -15,6 +18,7 @@ CharacterNode()
 next=NULL;
 }
 };
+
 class StringBuffer
 {
 public:
@@ -83,6 +87,7 @@ s[i]='\0';
 return s;
 }
 };
+
 class StringBufferNode
 {
 public:
@@ -98,6 +103,7 @@ sb=NULL;
 delete sb;
 }
 };
+
 class StringBufferCollection
 {
 public:
@@ -158,6 +164,7 @@ i++;
 return t->sb;
 }
 };
+
 int indexOf(char *s,char *f,int startFromIndex=0)
 {
 if(startFromIndex<0) return -1;
@@ -172,6 +179,7 @@ i++;
 }
 return -1;
 }
+
 int countOccurrences(char *s,char *f)
 {
 int count=0;
@@ -185,6 +193,7 @@ startFromIndex++;
 }
 return count;
 }
+
 void findAndReplace(char *s,char *f,char *r)
 {
 int si=0;
@@ -210,6 +219,7 @@ si=si+rlength;
 }
 delete [] tmp;
 }
+
 char **split(char *str,char *separator,int *numberOfSplits)
 {
 *numberOfSplits=countOccurrences(str,separator)+1;
@@ -267,6 +277,7 @@ splits=tsplits;
 *numberOfSplits=countOfNonEmptyStrings;
 return splits;
 }
+
 void allTrim(char *str)
 {
 int l;
@@ -315,7 +326,6 @@ if(l>0)
 strcpy(str,str+l);
 }
 }
-
 
 StringBufferCollection * convertFileToStringBufferCollection(char * str)
 {

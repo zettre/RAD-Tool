@@ -1,6 +1,8 @@
 #include "TagDataStructure.cpp"
-#include<stack>
+#include <stack>
+
 using namespace std;
+
 class DTOConfiguration
 {
 private:
@@ -103,7 +105,9 @@ return dtoConfiguration;
 friend class DTOGenerator;
 
 };
+
 DTOConfiguration * GeneratorUtility::dtoConfiguration=NULL;
+
 class Interface
 {
 char * packageName;
