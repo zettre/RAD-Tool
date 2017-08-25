@@ -18,7 +18,9 @@ name=NULL;
 if(value!=NULL) delete [] value;
 value=NULL;
 }
-};
+};//AttributeNode ends
+
+
 class TagNode
 {
 public:
@@ -65,7 +67,9 @@ delete at;
 attributeEnd=NULL;
 attributesCount=0;
 }
-};
+};//TagNode ends
+
+
 class Attribute
 {
 private:
@@ -87,7 +91,9 @@ char *m=new char[strlen(attributeNode->value)+1];
 strcpy(m,attributeNode->value);
 return m;
 }
-};
+};//Attribute ends
+
+
 class Node
 {
 private:
@@ -178,7 +184,9 @@ bool hasAttributes()
 {
 return this->tagNode->attributesCount>0;
 }
-};
+};//Node ends
+
+
 class TagDataStructureUtility
 {
 friend class TagDataStructure;
@@ -329,7 +337,9 @@ nv[0]=name;
 nv[1]=value;
 return nv;
 }
-};
+};//TagDataStructureUtility ends
+
+
 class TagDataStructure
 {
 private:
@@ -724,7 +734,7 @@ t=t->next;
 }
 }
 }
-}; // Class TagDataStructure ends
+};//TagDataStructure ends
 
 
 

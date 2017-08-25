@@ -88,6 +88,7 @@ return s;
 }
 };
 
+
 class StringBufferNode
 {
 public:
@@ -103,6 +104,7 @@ sb=NULL;
 delete sb;
 }
 };
+
 
 class StringBufferCollection
 {
@@ -165,6 +167,7 @@ return t->sb;
 }
 };
 
+
 int indexOf(char *s,char *f,int startFromIndex=0)
 {
 if(startFromIndex<0) return -1;
@@ -180,6 +183,7 @@ i++;
 return -1;
 }
 
+
 int countOccurrences(char *s,char *f)
 {
 int count=0;
@@ -193,6 +197,7 @@ startFromIndex++;
 }
 return count;
 }
+
 
 void findAndReplace(char *s,char *f,char *r)
 {
@@ -219,6 +224,7 @@ si=si+rlength;
 }
 delete [] tmp;
 }
+
 
 char **split(char *str,char *separator,int *numberOfSplits)
 {
@@ -278,6 +284,7 @@ splits=tsplits;
 return splits;
 }
 
+
 void allTrim(char *str)
 {
 int l;
@@ -303,6 +310,7 @@ findAndReplace(str,(char *)"  ",(char *)" ");
 }
 }
 
+
 void rightTrim(char *str)
 {
 int r;
@@ -313,6 +321,8 @@ r--;
 }
 str[r+1]='\0';
 }
+
+
 void leftTrim(char *str)
 {
 int l;
@@ -326,6 +336,7 @@ if(l>0)
 strcpy(str,str+l);
 }
 }
+
 
 StringBufferCollection * convertFileToStringBufferCollection(char * str)
 {
@@ -366,4 +377,38 @@ sb=new StringBuffer;
 else sb->append(ch);
 }
 return sbc;
+}
+
+
+char * concatenate(char * first,char * second)
+{
+	int l1=strlen(first);
+	int l2=strlen(second);
+	char * final=(char *)malloc(sizeof(char)*(l1+l2+1));
+	int x=0;
+	while(x<l1)
+	{
+		final[x]=first[x];
+		x++;
+	}
+	x=0;
+	while(x<l2)
+	{
+		final[x+l1]=second[x];
+		x++;
+	}
+	final[l1+l2]='\0';
+	return final;
+}
+char * substring(char * a,int start,int end)
+{
+	char * s=(char *)malloc(sizeof(char)*(end-start+2));
+	int i=start;
+	while(i<=end)
+	{
+		s[i-start]=a[i];
+		i++;
+	}
+	s[end-start+1]='\0';
+	return s;
 }
