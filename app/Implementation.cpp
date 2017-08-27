@@ -175,10 +175,75 @@ char * packageName;
 char ** packagesToImport;
 int packagesToImportCount;
 char * className;
+char * interfaceName;
+char ** properties;
+char ** dataTypes;
+int propertiesCount;
 char * compareValue;
 char * equalsValue;
-Interface * interface;
 public:
+void setPackageName(char * packageName)
+{
+this->packageName=packageName;
+}
+char * getPackageName()
+{
+return this->packageName;
+}
+void setPackagesToImport(char ** packagesToImport,int packagesToImportCount)
+{
+this->packagesToImport=packagesToImport;
+this->packagesToImportCount=packagesToImportCount;
+}
+char ** getPackagesToImport(int * packagesToImportCount)
+{
+*packagesToImportCount=this->packagesToImportCount;
+return this->packagesToImport;
+}
+void setClassName(char * className)
+{
+this->className=className;
+}
+char * getClassName()
+{
+return this->className;
+}
+void setInterfaceName(char * interfaceName)
+{
+this->interfaceName=interfaceName;
+}
+char * getInterfaceName()
+{
+return this->interfaceName;
+}
+void setProperties(char ** properties,char** dataTypes,int propertiesCount)
+{
+this->properties=properties;
+this->dataTypes=dataTypes;
+this->propertiesCount=propertiesCount;
+}
+char ** getProperties(char*** dataTypes,int * propertiesCount)
+{
+*propertiesCount=this->propertiesCount;
+*dataTypes=this->dataTypes;
+return this->properties;
+}
+void setCompareValue(char * compareValue)
+{
+this->compareValue=compareValue;
+}
+char * getCompareValue()
+{
+return this->compareValue;
+}
+void setEqualsValue(char * equalsValue)
+{
+this->equalsValue=equalsValue;
+}
+char * getEqualsValue()
+{
+return this->equalsValue;
+}
 
 };//Class ends
 
@@ -367,18 +432,16 @@ while(i<numberOfFiles)
 	char * fileName=concatenate(dtoConfiguration->targetFolder,interfaces[i]->getInterfaceName());
 	fileName=concatenate(fileName,(char*)".java");
 	FILE* f=fopen(fileName,"w");
-	fputs((char*)"package ",f);
+	fputs("package ",f);
 	fputs(interfaces[i]->getPackageName(),f);
-	fputs((char*)";",f);
-	fputs("\n",f);
+	fputs(";\n",f);
 	j=0;
 	ar=interfaces[i]->getPackagesToImport(&size);
 	while(j<size)
 	{
 		fputs("import ",f);
 		fputs(ar[j],f);
-		fputs(";",f);
-		fputs("\n",f);
+		fputs(";\n",f);
 		j++;
 	}
 	fputs("public interface ",f);
@@ -388,10 +451,20 @@ while(i<numberOfFiles)
 	ar=interfaces[i]->getExtendedInterfaces(&size);
 	while(j<size)
 	{
-		fputs(ar[j],f);
+		if(strcmp(ar[j],(char*)"Comparable")==0)
+		{
+			fputs(ar[j],f);
+			fputc('<',f);
+			fputs(interfaces[i]->getInterfaceName(),f);
+			fputc('>',f);			
+		}
+		else
+		{
+			fputs(ar[j],f);			
+		}
 		if(j!=size-1)
 		{
-			fputs(",",f);
+			fputc(',',f);
 		}
 		j++;
 	}
@@ -407,9 +480,9 @@ while(i<numberOfFiles)
 		fputc(c,f);
 		s=substring(ar[j],1,strlen(ar[j])-1);
 		fputs(s,f);
-		fputs("(",f);
+		fputc('(',f);
 		fputs(br[j],f);
-		fputs(" ",f);
+		fputc(' ',f);
 		fputs(ar[j],f);
 		fputs(");\n",f);
 		fputs("public ",f);
@@ -420,9 +493,7 @@ while(i<numberOfFiles)
 		fputs("();\n",f);
 		j++;
 	}
-	fputs("public boolean equals(Object object);\n",f);
-	fputs("public int compareTo(Object object);\n",f);
-	fputs("}",f);
+	fputc('}',f);
 	fclose(f);
 	i++;
 }
@@ -431,14 +502,244 @@ while(i<numberOfFiles)
 
 Class** getClasses()
 {
+Class ** classes=new Class *[numberOfFiles];
+int pi=0;
+while(pi<numberOfFiles)
+{
+classes[pi]=new Class;
+Node * node;
+node=dataStructures[pi]->getRootNode();
 
+node=node->getChild(0);
+int x=0;
+Node* nn;
+while(x<node->getChildCount())
+{
+nn=node->getChild(x);
+if(nn->isTag())
+{
+	if(strcmp(nn->getContent(),(char*)"<interface-name>")==0)
+	{
+		classes[pi]->setInterfaceName(nn->getTagValue());
+	}
+	if(strcmp(nn->getContent(),(char*)"<properties>")==0)
+	{
+		char** pack;
+		char** dack;
+		int pn;
+		if(nn->hasChildren())
+		{
+			int e=0;
+			Node* en;	
+			pn=nn->getChildCount();
+			pack=(char**)malloc(sizeof(char*)*pn);
+			dack=(char**)malloc(sizeof(char*)*pn);
+			while(e<pn)
+			{
+				en=nn->getChild(e);
+				if(en->isTag())
+				{
+					Node* eb;
+					if(strcmp(en->getContent(),(char*)"<property>")==0)
+					{
+						if(en->hasChildren())
+						{
+							int c=0;
+							while(c<en->getChildCount())
+							{
+								eb=en->getChild(c);
+								if(strcmp(eb->getContent(),(char*)"<name>")==0)
+								{
+									pack[e]=eb->getTagValue();
+								}
+								if(strcmp(eb->getContent(),(char*)"<data-type>")==0)
+								{
+									dack[e]=eb->getTagValue();
+								}
+								c++;
+							}
+						}
 
+					}
+				}
+				e++;
+			}
+		}
+		classes[pi]->setProperties(pack,dack,pn);
+	}
+}
+x++;
+}
+node=dataStructures[pi]->getRootNode();
+
+node=node->getChild(1);
+x=0;
+while(x<node->getChildCount())
+{
+nn=node->getChild(x);
+if(nn->isTag())
+{
+	if(strcmp(nn->getContent(),(char*)"<class-package>")==0)
+	{
+		classes[pi]->setPackageName(nn->getTagValue());
+	}
+	if(strcmp(nn->getContent(),(char*)"<class-imports>")==0)
+	{
+		char** pack;
+		int pn;
+		if(nn->hasChildren())
+		{
+			int e=0;
+			Node* en;
+			pn=nn->getChildCount();
+			pack=(char**)malloc(sizeof(char*)*pn);
+			while(e<pn)
+			{
+				en=nn->getChild(e);
+				if(en->isTag())
+				{
+					if(strcmp(en->getContent(),(char*)"<class-import>")==0)
+					{
+						pack[e]=en->getTagValue();
+					}
+				}
+				e++;
+			}		
+		}
+	classes[pi]->setPackagesToImport(pack,pn);
+	}
+	if(strcmp(nn->getContent(),(char*)"<class-name>")==0)
+	{
+		classes[pi]->setClassName(nn->getTagValue());
+	}
+	if(strcmp(nn->getContent(),(char*)"<equals-value>")==0)
+	{
+		classes[pi]->setEqualsValue(nn->getTagValue());
+	}
+	if(strcmp(nn->getContent(),(char*)"<compare-value>")==0)
+	{
+		classes[pi]->setCompareValue(nn->getTagValue());
+	}
+}
+x++;
+}
+
+pi++;
+}
+return classes;
 }
 void createImplementations()
 {
 Class** classes=getClasses();
-
-
+int i=0,size,j;
+char ** ar;
+char** br;
+while(i<numberOfFiles)
+{
+	char * fileName=concatenate(dtoConfiguration->targetFolder,classes[i]->getClassName());
+	fileName=concatenate(fileName,(char*)".java");
+	FILE* f=fopen(fileName,"w");
+	fputs("package ",f);
+	fputs(classes[i]->getPackageName(),f);
+	fputs(";\n",f);
+	j=0;
+	ar=classes[i]->getPackagesToImport(&size);
+	while(j<size)
+	{
+		fputs("import ",f);
+		fputs(ar[j],f);
+		fputs(";\n",f);
+		j++;
+	}
+	fputs("public class ",f);
+	fputs(classes[i]->getClassName(),f);
+	fputs(" implements ",f);
+	fputs(classes[i]->getInterfaceName(),f);
+	fputs("\n{\n",f);
+	ar=classes[i]->getProperties(&br,&size);
+	j=0;
+	while(j<size)
+	{
+		fputs("private ",f);
+		fputs(br[j],f);
+		fputc(' ',f);
+		fputs(ar[j],f);
+		fputs(";\n",f);
+		j++;
+	}
+	j=0;
+	char c;
+	char *s;
+	while(j<size)
+	{
+		fputs("public void set",f);
+		c=toupper(ar[j][0]);
+		fputc(c,f);
+		s=substring(ar[j],1,strlen(ar[j])-1);
+		fputs(s,f);
+		fputc('(',f);
+		fputs(br[j],f);
+		fputc(' ',f);
+		fputs(ar[j],f);
+		fputs(")\n{\nthis.",f);
+		fputs(ar[j],f);
+		fputc('=',f);
+		fputs(ar[j],f);
+		fputs(";\n}\n",f);
+		fputs("public ",f);
+		fputs(br[j],f);
+		fputs(" get",f);
+		fputc(c,f);
+		fputs(s,f);
+		fputs("()\n{\n",f);
+		fputs("return this.",f);
+		fputs(ar[j],f);
+		fputs(";\n}\n",f);
+		j++;
+	}
+	fputs("public boolean equals(Object object)\n{\nif(!(object instanceof ",f);
+	fputs(classes[i]->getClassName(),f);
+	fputs(")) return false;\n",f);
+	fputs(classes[i]->getInterfaceName(),f);
+	fputc(' ',f);
+	c=tolower(classes[i]->getInterfaceName()[0]);
+	fputc(c,f);
+	s=substring(classes[i]->getInterfaceName(),1,strlen(classes[i]->getInterfaceName())-1);
+	fputs(s,f);
+	fputs("=(",f);
+	fputs(classes[i]->getInterfaceName(),f);
+	fputs(")object;\nreturn this.",f);
+	fputs(classes[i]->getEqualsValue(),f);
+	fputs("==",f);
+	fputc(c,f);
+	fputs(s,f);
+	fputs(".get",f);
+	c=toupper(classes[i]->getEqualsValue()[0]);
+	fputc(c,f);
+	s=substring(classes[i]->getEqualsValue(),1,strlen(classes[i]->getEqualsValue())-1);
+	fputs(s,f);
+	fputs("();\n}\npublic int compareTo(",f);
+	fputs(classes[i]->getInterfaceName(),f);
+	fputc(' ',f);
+	c=tolower(classes[i]->getInterfaceName()[0]);
+	fputc(c,f);
+	s=substring(classes[i]->getInterfaceName(),1,strlen(classes[i]->getInterfaceName())-1);
+	fputs(s,f);
+	fputs(")\n{\nreturn this.",f);
+	fputs(classes[i]->getCompareValue(),f);
+	fputs(".compareTo(",f);
+	fputc(c,f);
+	fputs(s,f);
+	fputs(".get",f);
+	c=toupper(classes[i]->getCompareValue()[0]);
+	fputc(c,f);
+	s=substring(classes[i]->getCompareValue(),1,strlen(classes[i]->getCompareValue())-1);
+	fputs(s,f);
+	fputs("());\n}\n",f);
+	fputc('}',f);
+	fclose(f);
+	i++;
+}
 }
 public:
 DTOGenerator()
