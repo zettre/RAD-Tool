@@ -1,1 +1,3 @@
-app\app.exe
+app/app.exe
+data/*.dto
+data/*.data
